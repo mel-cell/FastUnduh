@@ -50,9 +50,7 @@ const game2048Board = ref([]);
 const game2048Score = ref(0);
 const game2048Over = ref(false);
 
-// Game switching state
-const switchingGame = ref(false);
-const switchCountdown = ref(3);
+// Game switching state (no auto-switch, manual only)
 
 // Mouse tracking for 3D effects
 const mouseX = ref(0);
@@ -175,46 +173,35 @@ const resetGame = () => {
 
 
 const switchToRandomGame = () => {
-  switchingGame.value = true;
-  switchCountdown.value = 3;
+  const games = ['snakes-ladders', 'snake', 'guess-number', 'memory-card', 'tic-tac-toe', '2048'];
+  const availableGames = games.filter(game => game !== selectedGame.value);
+  const newGame = availableGames[Math.floor(Math.random() * availableGames.length)];
 
-  const countdownInterval = setInterval(() => {
-    switchCountdown.value--;
-    if (switchCountdown.value <= 0) {
-      clearInterval(countdownInterval);
+  // Clean up current game
+  if (snakeGameInterval.value) {
+    clearInterval(snakeGameInterval.value);
+  }
 
-      const games = ['snakes-ladders', 'snake', 'guess-number', 'memory-card', 'tic-tac-toe', '2048'];
-      const availableGames = games.filter(game => game !== selectedGame.value);
-      const newGame = availableGames[Math.floor(Math.random() * availableGames.length)];
+  // Switch to new game
+  selectedGame.value = newGame;
 
-      // Clean up current game
-      if (snakeGameInterval.value) {
-        clearInterval(snakeGameInterval.value);
-      }
-
-      // Switch to new game
-      selectedGame.value = newGame;
-      switchingGame.value = false;
-
-      // Initialize the new game
-      if (newGame === 'snakes-ladders') {
-        playerPosition.value = 1;
-        diceValue.value = null;
-        gameMessage.value = "Klik dadu untuk mulai!";
-        canRoll.value = true;
-      } else if (newGame === 'snake') {
-        resetSnakeGame();
-      } else if (newGame === 'guess-number') {
-        initGuessNumber();
-      } else if (newGame === 'memory-card') {
-        initMemoryGame();
-      } else if (newGame === 'tic-tac-toe') {
-        initTicTacToe();
-      } else if (newGame === '2048') {
-        init2048();
-      }
-    }
-  }, 1000);
+  // Initialize the new game
+  if (newGame === 'snakes-ladders') {
+    playerPosition.value = 1;
+    diceValue.value = null;
+    gameMessage.value = "Klik dadu untuk mulai!";
+    canRoll.value = true;
+  } else if (newGame === 'snake') {
+    resetSnakeGame();
+  } else if (newGame === 'guess-number') {
+    initGuessNumber();
+  } else if (newGame === 'memory-card') {
+    initMemoryGame();
+  } else if (newGame === 'tic-tac-toe') {
+    initTicTacToe();
+  } else if (newGame === '2048') {
+    init2048();
+  }
 };
 
 // Snake Game Functions
@@ -282,10 +269,6 @@ const gameOver = () => {
     clearInterval(snakeGameInterval.value);
     snakeGameInterval.value = null;
   }
-  // Auto switch to next game after 3 seconds
-  setTimeout(() => {
-    switchToRandomGame();
-  }, 3000);
 };
 
 const handleKeydown = (e) => {
@@ -346,16 +329,8 @@ const makeGuess = () => {
   if (guess === targetNumber.value) {
     guessWon.value = true;
     guessMessage.value = `🎉 Benar! Angkanya ${targetNumber.value}! (${guessHistory.value.length} tebakan)`;
-    // Auto switch to next game after 3 seconds
-    setTimeout(() => {
-      switchToRandomGame();
-    }, 3000);
   } else if (guessHistory.value.length >= maxGuesses) {
     guessMessage.value = `Game Over! Angkanya ${targetNumber.value}`;
-    // Auto switch to next game after 3 seconds
-    setTimeout(() => {
-      switchToRandomGame();
-    }, 3000);
   } else if (guess < targetNumber.value) {
     guessMessage.value = `Terlalu kecil! (${guessHistory.value.length}/${maxGuesses})`;
   } else {
@@ -391,10 +366,6 @@ const flipCard = (index) => {
 
       if (matchedCards.value.length === memoryCards.value.length) {
         memoryWon.value = true;
-        // Auto switch to next game after 3 seconds
-        setTimeout(() => {
-          switchToRandomGame();
-        }, 3000);
       }
     } else {
       setTimeout(() => {
@@ -421,12 +392,7 @@ const makeMove = (index) => {
   ticBoard.value[index] = 'X';
   ticWinner.value = calculateWinner(ticBoard.value);
 
-  if (ticWinner.value) {
-    // Auto switch to next game after 3 seconds
-    setTimeout(() => {
-      switchToRandomGame();
-    }, 3000);
-  } else if (ticBoard.value.some(cell => cell === null)) {
+  if (!ticWinner.value && ticBoard.value.some(cell => cell === null)) {
     setTimeout(() => {
       aiMove();
     }, 500);
@@ -440,13 +406,6 @@ const aiMove = () => {
   const randomMove = availableMoves[Math.floor(Math.random() * availableMoves.length)];
   ticBoard.value[randomMove] = 'O';
   ticWinner.value = calculateWinner(ticBoard.value);
-
-  if (ticWinner.value) {
-    // Auto switch to next game after 3 seconds
-    setTimeout(() => {
-      switchToRandomGame();
-    }, 3000);
-  }
 };
 
 const calculateWinner = (board) => {
@@ -551,10 +510,6 @@ const checkGameOver = () => {
     for (let j = 0; j < 4; j++) {
       if (game2048Board.value[i][j] === 2048) {
         game2048Over.value = true;
-        // Auto switch to next game after 3 seconds
-        setTimeout(() => {
-          switchToRandomGame();
-        }, 3000);
         return;
       }
     }
@@ -569,10 +524,6 @@ const checkGameOver = () => {
     }
   }
   game2048Over.value = true;
-  // Auto switch to next game after 3 seconds
-  setTimeout(() => {
-    switchToRandomGame();
-  }, 3000);
 };
 
 const handle2048Keydown = (e) => {
@@ -731,10 +682,6 @@ const checkSpecialCell = (position) => {
     else {
       if (position === 100) {
         gameMessage.value = "🎉 Selamat! Kamu menang!";
-        // Auto switch to next game after 3 seconds
-        setTimeout(() => {
-          switchToRandomGame();
-        }, 3000);
       } else {
         gameMessage.value = `Posisi: ${position}`;
       }
@@ -866,18 +813,6 @@ const boardCells = computed(() => {
       <div class="glass-panel p-4 md:p-6 rounded-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto relative card-3d shadow-2xl shadow-blue-500/20" :style="getTiltStyle(0.3)">
         <!-- Animated border glow -->
         <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 opacity-50 blur-xl animate-pulse-glow pointer-events-none"></div>
-
-        <!-- Switching Game Notification -->
-        <div v-if="switchingGame" class="absolute inset-0 bg-slate-900/90 backdrop-blur-lg z-50 flex items-center justify-center rounded-2xl animate-scale-in">
-          <div class="text-center">
-            <div class="text-7xl mb-6 animate-bounce">🎮</div>
-            <h3 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-3">Game Berikutnya</h3>
-            <p class="text-slate-300 text-xl">dalam <span class="text-white font-bold text-2xl">{{ switchCountdown }}</span> detik...</p>
-            <div class="mt-6 flex justify-center gap-2">
-              <div v-for="i in 3" :key="i" class="w-3 h-3 rounded-full bg-blue-500" :class="{ 'animate-pulse': i <= (4 - switchCountdown) }"></div>
-            </div>
-          </div>
-        </div>
 
         <!-- Close Button with 3D effect -->
         <button
@@ -1039,7 +974,7 @@ const boardCells = computed(() => {
               </button>
               <button
                 @click="resetGame"
-                class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
+                class="flex-1 button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
               >
                 🔄 Main Lagi
               </button>
@@ -1072,7 +1007,7 @@ const boardCells = computed(() => {
             </div>
             <button
               @click="resetGame"
-              class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
+              class="w-full button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
             >
               🔄 Main Lagi
             </button>
@@ -1138,7 +1073,7 @@ const boardCells = computed(() => {
               <p class="text-white text-base">Skor Akhir: {{ snakeScore }}</p>
               <button
                 @click="resetSnakeGame"
-                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
+                class="button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
               >
                 🔄 Main Lagi
               </button>
@@ -1200,7 +1135,7 @@ const boardCells = computed(() => {
                 </button>
                 <button
                   @click="resetGame"
-                  class="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
+                  class="flex-1 button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
                 >
                   🔄 Main Lagi
                 </button>
@@ -1233,7 +1168,7 @@ const boardCells = computed(() => {
               </div>
               <button
                 @click="resetGame"
-                class="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200"
+                class="w-full button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-6 py-3 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
               >
                 🔄 Main Lagi
               </button>
@@ -1243,9 +1178,12 @@ const boardCells = computed(() => {
 
         <!-- Guess Number Game -->
         <div v-if="selectedGame === 'guess-number'">
-          <div class="text-center mb-6">
-            <button @click="switchToRandomGame" class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-4 flex items-center gap-2 mx-auto text-sm text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="text-center mb-4 animate-slide-up">
+            <button
+              @click="switchToRandomGame"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-orange-600/30hover:to-yellow-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -1254,30 +1192,68 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-3xl font-bold text-white mb-4">🔢 Tebak Angka</h2>
-            <p class="text-lg text-white mb-4">{{ guessMessage }}</p>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-yellow-400 mb-4 animate-gradient">🔢 Tebak Angka</h2>
+            <div class="flex items-center justify-center gap-3 flex-wrap mb-4">
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <span class="text-slate-400 text-xs">Tebakan:</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-orange-400 transition-colors">{{ guessHistory.length }}/{{ maxGuesses }}</span>
+              </div>
+            </div>
+          </div>
 
-            <div v-if="!guessWon && guessHistory.length < maxGuesses" class="max-w-md mx-auto space-y-4">
-              <input v-model="guessInput" @keyup.enter="makeGuess" type="number" placeholder="Masukkan tebakan..." class="w-full bg-slate-700/50 text-white px-6 py-4 rounded-xl text-center text-2xl" />
-              <button @click="makeGuess" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold px-8 py-4 rounded-xl">Tebak!</button>
+          <div class="mb-4 bg-slate-800/30 p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-orange-500/5 to-yellow-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <p class="text-lg text-white mb-4 font-semibold relative z-10 animate-pulse">{{ guessMessage }}</p>
+
+            <div v-if="!guessWon && guessHistory.length < maxGuesses" class="max-w-md mx-auto space-y-4 relative z-10">
+              <input
+                v-model="guessInput"
+                @keyup.enter="makeGuess"
+                type="number"
+                placeholder="Masukkan tebakan..."
+                class="w-full bg-slate-700/50 text-white px-6 py-4 rounded-xl text-center text-2xl border-2 border-orange-500/30 focus:border-orange-500 focus:outline-none transition-all duration-300 hover:shadow-lg hover:shadow-orange-500/20"
+              />
+              <button
+                @click="makeGuess"
+                class="button-3d w-full bg-gradient-to-br from-orange-600 via-yellow-600 to-orange-600 hover:from-orange-500 hover:via-yellow-500 hover:to-orange-500 text-white font-bold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-orange-500/50 relative overflow-hidden group"
+              >
+                <span class="relative z-10">🎯 Tebak!</span>
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              </button>
             </div>
 
-            <div v-if="guessHistory.length > 0" class="mt-6">
-              <p class="text-slate-400 mb-2">Riwayat Tebakan:</p>
+            <div v-if="guessHistory.length > 0" class="mt-6 relative z-10">
+              <p class="text-slate-400 mb-3 text-sm font-semibold">📝 Riwayat Tebakan:</p>
               <div class="flex flex-wrap gap-2 justify-center">
-                <span v-for="(guess, idx) in guessHistory" :key="idx" class="glass-panel px-4 py-2 rounded-lg text-white">{{ guess }}</span>
+                <span
+                  v-for="(guess, idx) in guessHistory"
+                  :key="idx"
+                  class="glass-panel px-4 py-2 rounded-lg text-white font-bold card-3d hover:scale-110 transition-all duration-300 cursor-pointer hover:bg-orange-500/20"
+                  :class="{ 'animate-bounce': idx === guessHistory.length - 1 }"
+                >
+                  {{ guess }}
+                </span>
               </div>
             </div>
 
-            <button v-if="guessWon || guessHistory.length >= maxGuesses" @click="initGuessNumber" class="mt-6 bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-xl">🔄 Main Lagi</button>
+            <button
+              v-if="guessWon || guessHistory.length >= maxGuesses"
+              @click="initGuessNumber"
+              class="mt-6 button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50 relative z-10"
+            >
+              🔄 Main Lagi
+            </button>
           </div>
         </div>
 
         <!-- Memory Card Game -->
         <div v-if="selectedGame === 'memory-card'">
-          <div class="text-center mb-6">
-            <button @click="switchToRandomGame" class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-4 flex items-center gap-2 mx-auto text-sm text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="text-center mb-4 animate-slide-up">
+            <button
+              @click="switchToRandomGame"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-pink-600/30 hover:to-rose-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -1286,27 +1262,58 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-3xl font-bold text-white mb-4">🃏 Memory Card</h2>
-            <p class="text-slate-400">Langkah: {{ memoryMoves }}</p>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-400 to-rose-400 mb-4 animate-gradient">🃏 Memory Card</h2>
+            <div class="flex items-center justify-center gap-3 flex-wrap">
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <span class="text-slate-400 text-xs">Langkah:</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-pink-400 transition-colors">{{ memoryMoves }}</span>
+              </div>
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <span class="text-slate-400 text-xs">Cocok:</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-rose-400 transition-colors">{{ matchedCards.length / 2 }}/8</span>
+              </div>
+            </div>
           </div>
 
-          <div class="grid grid-cols-4 gap-3 max-w-md mx-auto mb-6">
-            <button v-for="(card, index) in memoryCards" :key="card.id" @click="flipCard(index)" :class="{ 'bg-blue-600': isCardFlipped(index), 'bg-slate-700': !isCardFlipped(index) }" class="aspect-square rounded-xl text-4xl flex items-center justify-center transition-all hover:scale-105">
-              {{ isCardFlipped(index) ? card.emoji : '?' }}
+          <div class="mb-4 bg-slate-800/30 p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-pink-500/5 to-rose-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="grid grid-cols-4 gap-3 max-w-md mx-auto relative z-10">
+              <button
+                v-for="(card, index) in memoryCards"
+                :key="card.id"
+                @click="flipCard(index)"
+                class="aspect-square rounded-xl text-4xl flex items-center justify-center transition-all duration-300 button-3d hover:scale-110 font-bold"
+                :class="{
+                  'bg-gradient-to-br from-pink-600 to-rose-600 shadow-lg shadow-pink-500/50 scale-105': isCardFlipped(index),
+                  'bg-slate-700 hover:bg-slate-600 hover:shadow-lg': !isCardFlipped(index)
+                }"
+              >
+                <span :class="{ 'animate-bounce': isCardFlipped(index) && matchedCards.includes(index) }">
+                  {{ isCardFlipped(index) ? card.emoji : '❓' }}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          <div v-if="memoryWon" class="text-center animate-scale-in">
+            <p class="text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-rose-400 font-bold text-2xl mb-4 animate-pulse">🎉 Selamat! Kamu menang dalam {{ memoryMoves }} langkah!</p>
+  <button
+              @click="initMemoryGame"
+              class="button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
+            >
+              🔄 Main Lagi
             </button>
-          </div>
-
-          <div v-if="memoryWon" class="text-center">
-            <p class="text-green-400 font-bold text-2xl mb-4">🎉 Selamat! Kamu menang dalam {{ memoryMoves }} langkah!</p>
-            <button @click="initMemoryGame" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-xl">🔄 Main Lagi</button>
           </div>
         </div>
 
         <!-- Tic Tac Toe Game -->
         <div v-if="selectedGame === 'tic-tac-toe'">
-          <div class="text-center mb-6">
-            <button @click="switchToRandomGame" class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-4 flex items-center gap-2 mx-auto text-sm text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="text-center mb-4 animate-slide-up">
+            <button
+              @click="switchToRandomGame"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-cyan-600/30 hover:to-blue-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -1315,26 +1322,53 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-3xl font-bold text-white mb-4">⭕ Tic Tac Toe</h2>
-            <p class="text-slate-400 mb-4">{{ ticWinner ? (ticWinner === 'Draw' ? 'Seri!' : `${ticWinner} Menang!`) : 'Giliran Kamu (X)' }}</p>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-400 mb-4 animate-gradient">⭕ Tic Tac Toe</h2>
+            <div class="glass-panel px-6 py-3 rounded-lg card-3d hover:scale-110 transition-all duration-300 inline-block">
+              <p class="text-white font-bold text-lg">
+                {{ ticWinner ? (ticWinner === 'Draw' ? '🤝 Seri!' : `🎉 ${ticWinner} Menang!`) : '🎮 Giliran Kamu (X)' }}
+              </p>
+            </div>
           </div>
 
-          <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto mb-6">
-            <button v-for="(cell, index) in ticBoard" :key="index" @click="makeMove(index)" :disabled="cell || ticWinner" class="aspect-square bg-slate-700 rounded-xl text-5xl font-bold flex items-center justify-center hover:bg-slate-600 disabled:cursor-not-allowed transition-all" :class="{ 'text-blue-400': cell === 'X', 'text-red-400': cell === 'O' }">
-              {{ cell }}
+          <div class="mb-4 bg-slate-800/30 p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="grid grid-cols-3 gap-3 max-w-sm mx-auto relative z-10">
+              <button
+                v-for="(cell, index) in ticBoard"
+                :key="index"
+                @click="makeMove(index)"
+                :disabled="cell || ticWinner"
+                class="aspect-square bg-slate-700 rounded-xl text-5xl font-bold flex items-center justify-center hover:bg-slate-600 disabled:cursor-not-allowed transition-all duration-300 button-3d hover:scale-110 hover:shadow-xl relative overflow-hidden group/cell"
+                :class="{
+                'text-cyan-400 shadow-lg shadow-cyan-500/50': cell === 'X',
+                  'text-rose-400 shadow-lg shadow-rose-500/50': cell === 'O',
+                  'hover:shadow-cyan-500/30': !cell && !ticWinner
+                }"
+              >
+                <span :class="{ 'animate-bounce': cell }">{{ cell }}</span>
+                <div v-if="!cell && !ticWinner" class="absolute inset-0 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 opacity-0 group-hover/cell:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+</button>
+            </div>
+          </div>
+
+          <div v-if="ticWinner" class="text-center animate-scale-in">
+            <button
+              @click="initTicTacToe"
+              class="button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
+            >
+              🔄 Main Lagi
             </button>
-          </div>
-
-          <div v-if="ticWinner" class="text-center">
-            <button @click="initTicTacToe" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-xl">🔄 Main Lagi</button>
           </div>
         </div>
 
         <!-- 2048 Game -->
         <div v-if="selectedGame === '2048'">
-          <div class="text-center mb-6">
-            <button @click="switchToRandomGame" class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-4 flex items-center gap-2 mx-auto text-sm text-white">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <div class="text-center mb-4 animate-slide-up">
+            <button
+              @click="switchToRandomGame"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-amber-600/30 hover:to-orange-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -1343,30 +1377,60 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-3xl font-bold text-white mb-4">🎯 2048</h2>
-            <div class="flex gap-4 justify-center mb-4">
-              <div class="glass-panel px-4 py-2 rounded-lg">
-                <span class="text-slate-400 text-sm">Skor:</span>
-                <span class="text-white font-bold text-xl ml-2">{{ game2048Score }}</span>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-orange-400 mb-4 animate-gradient">🎯 2048</h2>
+            <div class="flex gap-3 justify-center flex-wrap">
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <span class="text-slate-400 text-xs">Skor:</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-amber-400 transition-colors">{{ game2048Score }}</span>
+              </div>
+              <div class="glass-panel px-3 py-2 rounded-lg text-slate-400 text-xs animate-pulse">
+                ⌨️ Gunakan tombol panah
               </div>
             </div>
-            <p class="text-slate-400 text-sm">Gunakan tombol panah untuk bermain</p>
           </div>
 
-          <div class="max-w-md mx-auto mb-6 bg-slate-800/50 p-4 rounded-xl">
-            <div class="grid grid-cols-4 gap-3">
-              <template v-for="(row, i) in game2048Board" :key="i">
-                <div v-for="(cell, j) in row" :key="`${i}-${j}`" class="aspect-square rounded-lg flex items-center justify-center font-bold text-2xl" :class="{ 'bg-slate-700': cell === 0, 'bg-yellow-600': cell === 2, 'bg-yellow-500': cell === 4, 'bg-orange-500': cell === 8, 'bg-orange-600': cell === 16, 'bg-red-500': cell === 32, 'bg-red-600': cell === 64, 'bg-red-700': cell === 128, 'bg-purple-600': cell === 256, 'bg-purple-700': cell === 512, 'bg-blue-600': cell === 1024, 'bg-blue-700': cell === 2048, 'text-white': cell > 0 }">
-                  {{ cell || '' }}
-                </div>
-              </template>
+          <div class="mb-4 bg-slate-800/30 p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-amber-500/5 to-orange-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="max-w-md mx-auto relative z-10">
+              <div class="grid grid-cols-4 gap-3">
+                <template v-for="(row, i) in game2048Board" :key="i">
+                  <div
+                    v-for="(cell, j) in row"
+                    :key="`${i}-${j}`"
+                    class="aspect-square rounded-lg flex items-center justify-center font-bold text-2xl transition-all duration-300 button-3d"
+                    :class="{
+                      'bg-slate-700 text-slate-600': cell === 0,
+                      'bg-yellow-600 text-white shadow-lg shadow-yellow-500/50 scale-105': cell === 2,
+                      'bg-yellow-500 text-white shadow-lg shadow-yellow-400/50 scale-105': cell === 4,
+                      'bg-orange-500 text-white shadow-lg shadow-orange-500/50 scale-105': cell === 8,
+                      'bg-orange-600 text-white shadow-lg shadow-orange-600/50 scale-105': cell === 16,
+                      'bg-red-500 text-white shadow-lg shadow-red-500/50 scale-105': cell === 32,
+                      'bg-red-600 text-white shadow-lg shadow-red-600/50 scale-105': cell === 64,
+                      'bg-red-700 text-white shadow-lg shadow-red-700/50 scale-105': cell === 128,
+       'bg-purple-600 text-white shadow-lg shadow-purple-600/50 scale-105': cell === 256,
+                    'bg-purple-700 text-white shadow-lg shadow-purple-700/50 scale-105': cell === 512,
+                      'bg-blue-600 text-white shadow-lgshadow-blue-600/50 scale-110 animate-pulse': cell === 1024,
+                      'bg-gradient-to-br from-blue-700 to-purple-700 text-white shadow-2xl shadow-blue-700/70 scale-110animate-bounce': cell === 2048
+               }"
+    >
+                    {{ cell || '' }}
+                  </div>
+                </template>
+       </div>
             </div>
           </div>
 
-          <div v-if="game2048Over" class="text-center">
-            <p class="text-red-400 font-bold text-2xl mb-4">Game Over!</p>
-            <button @click="init2048" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-8 py-4 rounded-xl">🔄 Main Lagi</button>
-          </div>
+          <div v-if="game2048Over" class="text-center animate-scale-in">
+            <p class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 to-orange-400 font-bold text-2xl mb-4 animate-pulse">
+              {{ game2048Board.flat().includes(2048) ? '🎉 Selamat! Kamu mencapai 2048!' : '💥 Game Over!' }}
+            </p>
+      <button
+              @click="init2048"
+              class="button-3d bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold px-8 py-4 rounded-xl transition-all duration-300 hover:scale-105 hover:shadow-xl hover:shadow-blue-500/50"
+            >
+              🔄 Main Lagi
+            </button>
+</div>
         </div>
       </div>
     </div>

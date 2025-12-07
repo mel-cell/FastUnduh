@@ -851,25 +851,38 @@ const boardCells = computed(() => {
       ></div>
     </div>
 
-    <!-- Game Modal -->
+    <!-- Game Modal with 3D Effects -->
     <div
       v-if="showGame"
-      class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4"
+      class="fixed inset-0 bg-slate-900/40 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-scale-in"
     >
-      <div class="glass-panel p-4 md:p-6 rounded-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto relative">
+      <!-- Animated particles in background -->
+      <div class="absolute inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-1/4 left-1/4 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl animate-float"></div>
+        <div class="absolute bottom-1/4 right-1/4 w-40 h-40 bg-purple-500/10 rounded-full blur-3xl animate-float" style="animation-delay: 1s;"></div>
+        <div class="absolute top-1/2 right-1/3 w-24 h-24 bg-pink-500/10 rounded-full blur-3xl animate-float" style="animation-delay: 2s;"></div>
+      </div>
+
+      <div class="glass-panel p-4 md:p-6 rounded-2xl max-w-3xl w-full max-h-[95vh] overflow-y-auto relative card-3d shadow-2xl shadow-blue-500/20" :style="getTiltStyle(0.3)">
+        <!-- Animated border glow -->
+        <div class="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-pink-500/20 opacity-50 blur-xl animate-pulse-glow pointer-events-none"></div>
+
         <!-- Switching Game Notification -->
-        <div v-if="switchingGame" class="absolute inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center rounded-2xl">
+        <div v-if="switchingGame" class="absolute inset-0 bg-slate-900/90 backdrop-blur-lg z-50 flex items-center justify-center rounded-2xl animate-scale-in">
           <div class="text-center">
-            <div class="text-6xl mb-4 animate-bounce">🎮</div>
-            <h3 class="text-2xl font-bold text-white mb-2">Game Berikutnya</h3>
-            <p class="text-slate-300 text-lg">dalam {{ switchCountdown }} detik...</p>
+            <div class="text-7xl mb-6 animate-bounce">🎮</div>
+            <h3 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-3">Game Berikutnya</h3>
+            <p class="text-slate-300 text-xl">dalam <span class="text-white font-bold text-2xl">{{ switchCountdown }}</span> detik...</p>
+            <div class="mt-6 flex justify-center gap-2">
+              <div v-for="i in 3" :key="i" class="w-3 h-3 rounded-full bg-blue-500" :class="{ 'animate-pulse': i <= (4 - switchCountdown) }"></div>
+            </div>
           </div>
         </div>
 
-        <!-- Close Button -->
+        <!-- Close Button with 3D effect -->
         <button
           @click="closeGame"
-          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-colors p-2 hover:bg-slate-700/50 rounded-lg z-10"
+          class="absolute top-4 right-4 text-slate-400 hover:text-white transition-all duration-300 p-2 hover:bg-red-500/20 rounded-lg z-10 card-3d hover:scale-110 hover:rotate-90 group"
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -890,13 +903,13 @@ const boardCells = computed(() => {
 
 
         <!-- Snakes and Ladders Game -->
-        <div v-if="selectedGame === 'snakes-ladders'">
-          <div class="text-center mb-4">
+        <div v-if="selectedGame === 'snakes-ladders'" class="relative z-10">
+          <div class="text-center mb-4 animate-slide-up">
             <button
               @click="switchToRandomGame"
-              class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-3 flex items-center gap-2 mx-auto text-sm text-white"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-blue-600/30 hover:to-purple-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -905,22 +918,23 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-2xl font-bold text-white mb-3">🎲 Ular Tangga</h2>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400 mb-4 animate-gradient">🎲 Ular Tangga</h2>
             <div class="flex items-center justify-center gap-3 flex-wrap">
-              <div class="glass-panel px-3 py-1.5 rounded-lg">
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
                 <span class="text-slate-400 text-xs">Posisi:</span>
-                <span class="text-white font-bold text-lg ml-1">{{ playerPosition }}</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-blue-400 transition-colors">{{ playerPosition }}</span>
               </div>
-              <div class="glass-panel px-3 py-1.5 rounded-lg">
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
                 <span class="text-slate-400 text-xs">Target:</span>
-                <span class="text-white font-bold text-lg ml-1">100</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-purple-400 transition-colors">100</span>
               </div>
             </div>
           </div>
 
           <!-- Game Board -->
-          <div class="mb-4 bg-slate-800/30 p-2 md:p-3 rounded-xl">
-            <div class="grid grid-cols-10 gap-0.5 aspect-square max-w-md mx-auto">
+          <div class="mb-4 bg-slate-800/30 p-3 md:p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="grid grid-cols-10 gap-0.5 aspect-square max-w-md mx-auto relative z-10">
               <template v-for="row in boardCells" :key="row">
                 <div
                   v-for="cell in row"
@@ -939,32 +953,33 @@ const boardCells = computed(() => {
           </div>
 
           <!-- Dice and Controls -->
-          <div class="flex flex-col items-center gap-3">
+          <div class="flex flex-col items-center gap-4">
             <div class="text-center">
-              <p class="text-white font-semibold text-base mb-2">{{ gameMessage }}</p>
+              <p class="text-white font-semibold text-lg mb-3 animate-pulse">{{ gameMessage }}</p>
               <button
                 @click="rollDice"
                 :disabled="!canRoll || isRolling"
-                class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-bold px-6 py-3 rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed text-5xl"
-                :class="{ 'animate-bounce': canRoll && !isRolling }"
+                class="button-3d bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 hover:from-blue-500 hover:via-purple-500 hover:to-pink-500 text-white font-bold px-10 py-6 rounded-2xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed text-6xl shadow-2xl shadow-blue-500/50 hover:shadow-purple-500/50 relative overflow-hidden group"
+                :class="{ 'animate-bounce': canRoll && !isRolling, 'animate-spin': isRolling }"
               >
-                {{ diceValue || '🎲' }}
+                <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
+                <span class="relative z-10">{{ diceValue || '🎲' }}</span>
               </button>
             </div>
 
-            <!-- Legend -->
-            <div class="flex gap-3 text-xs text-slate-400 flex-wrap justify-center">
-              <div class="flex items-center gap-1.5">
-                <div class="w-3 h-3 bg-yellow-500 rounded"></div>
-                <span>Posisi</span>
+            <!-- Legend with 3D cards -->
+            <div class="flex gap-3 text-xs flex-wrap justify-center">
+              <div class="glass-panel px-3 py-2 rounded-lg flex items-center gap-2 card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <div class="w-4 h-4 bg-yellow-500 rounded shadow-lg group-hover:shadow-yellow-500/50 transition-shadow"></div>
+                <span class="text-slate-300 group-hover:text-white transition-colors">Posisi</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="w-3 h-3 bg-red-500/30 rounded"></div>
-                <span>🐍 Ular</span>
+              <div class="glass-panel px-3 py-2 rounded-lg flex items-center gap-2 card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <div class="w-4 h-4 bg-red-500/50 rounded shadow-lg group-hover:shadow-red-500/50 transition-shadow"></div>
+                <span class="text-slate-300 group-hover:text-white transition-colors">🐍 Ular</span>
               </div>
-              <div class="flex items-center gap-1.5">
-                <div class="w-3 h-3 bg-green-500/30 rounded"></div>
-                <span>🪜 Tangga</span>
+              <div class="glass-panel px-3 py-2 rounded-lg flex items-center gap-2 card-3d hover:scale-110 transition-all duration-300 cursor-pointer group">
+                <div class="w-4 h-4 bg-green-500/50 rounded shadow-lg group-hover:shadow-green-500/50 transition-shadow"></div>
+                <span class="text-slate-300 group-hover:text-white transition-colors">🪜 Tangga</span>
               </div>
             </div>
 
@@ -1066,13 +1081,13 @@ const boardCells = computed(() => {
         </div>
 
         <!-- Snake Game -->
-        <div v-if="selectedGame === 'snake'">
-          <div class="text-center mb-4">
+        <div v-if="selectedGame === 'snake'" class="relative z-10">
+          <div class="text-center mb-4 animate-slide-up">
             <button
               @click="switchToRandomGame"
-              class="glass-panel px-4 py-2 rounded-lg hover:bg-slate-600/50 transition-colors mb-3 flex items-center gap-2 mx-auto text-sm text-white"
+              class="glass-panel px-4 py-2 rounded-lg hover:bg-gradient-to-r hover:from-green-600/30 hover:to-emerald-600/30 transition-all duration-300 mb-3 flex items-center gap-2 mx-auto text-sm text-white button-3d hover:scale-105 group"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="group-hover:rotate-180 transition-transform duration-500">
                 <polyline points="16 3 21 3 21 8"></polyline>
                 <line x1="4" y1="20" x2="21" y2="3"></line>
                 <polyline points="21 16 21 21 16 21"></polyline>
@@ -1081,18 +1096,20 @@ const boardCells = computed(() => {
               </svg>
               Ganti Game
             </button>
-            <h2 class="text-2xl font-bold text-white mb-3">🐍 Snake Game</h2>
+            <h2 class="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-green-400 to-emerald-400 mb-4 animate-gradient">🐍 Snake Game</h2>
             <div class="flex items-center justify-center gap-3 flex-wrap">
-              <div class="glass-panel px-3 py-1.5 rounded-lg">
-                <span class="text-slate-400 text-xs">Skor:</span>
-                <span class="text-white font-bold text-lg ml-1">{{ snakeScore }}</span>
+              <div class="glass-panel px-4 py-2 rounded-lg card-3d hover:scale-110 transition-all duration-300 cursor-pointer group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-green-500/20 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <span class="text-slate-400 text-xs relative z-10">Skor:</span>
+                <span class="text-white font-bold text-xl ml-2 group-hover:text-green-400 transition-colors relative z-10">{{ snakeScore }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Snake Game Board -->
-          <div class="mb-4 bg-slate-800/30 p-2 md:p-3 rounded-xl">
-            <div class="grid gap-0 aspect-square max-w-md mx-auto bg-slate-900/50 rounded-lg overflow-hidden" :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }">
+          <!-- Snake Game Board with 3D -->
+          <div class="mb-4 bg-slate-800/30 p-3 md:p-4 rounded-xl card-3d shadow-lg hover:shadow-2xl hover:shadow-green-500/20 transition-all duration-300 relative overflow-hidden group">
+            <div class="absolute inset-0 bg-gradient-to-br from-green-500/5 to-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+            <div class="grid gap-0 aspect-square max-w-md mx-auto bg-slate-900/50 rounded-lg overflow-hidden relative z-10 shadow-inner" :style="{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }">
               <template v-for="y in gridSize" :key="y">
                 <div
                   v-for="x in gridSize"
@@ -1614,7 +1631,7 @@ const boardCells = computed(() => {
                         <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
                       </svg>
                     </a>
-                    <a href="#" class="p-3 bg-slate-800/50 rounded-xl hover:bg-pink-600/30 transition-all duration-300 card-3d hover:scale-125 hover:rotate-12 group">
+                    <a href="https://www.instagram.com/nhhdky/" class="p-3 bg-slate-800/50 rounded-xl hover:bg-pink-600/30 transition-all duration-300 card-3d hover:scale-125 hover:rotate-12 group">
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400 group-hover:text-pink-400 transition-colors">
                         <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
                         <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>

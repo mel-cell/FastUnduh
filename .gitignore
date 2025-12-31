@@ -1,36 +1,41 @@
-# Logs
-logs
-*.log
+# --- OS & IDEs ---
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Node.js / Frontend (Client) ---
+node_modules/
+dist/
+build/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
+.env
+.env.local
+.env.*.local
+*.log
 
-node_modules
-.DS_Store
-dist
-dist-ssr
-coverage
-*.local
+# --- Go / Backend (Server) ---
+# Binaries
+/server/main
+/server/main.exe
+*.exe
+*.dll
+*.so
+*.dylib
+*.test
+*.out
 
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
+# Downloads (Temporary files)
+/server/downloads/
+downloads/
 
-*.tsbuildinfo
+# Go workspace
+go.work
 
-.eslintcache
-
-# Cypress
-/cypress/videos/
-/cypress/screenshots/
-
-# Vitest
-__screenshots__/
+# --- Docker ---
+docker-compose.override.yml

@@ -1,0 +1,42 @@
+services:
+  # ==============================
+  # BACKEND (GO + YT-DLP)
+  # ==============================
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: fastunduh-backend
+    restart: unless-stopped
+    ports:
+      - "8085:8080" # Backend API di port 8085 (Unik)
+    volumes:
+      - ./downloads:/app/downloads # Agar hasil download bisa diakses di host jika perlu
+    environment:
+      - PORT=8080 # Internal container ttp 8080
+      - CORS_ORIGIN=*
+      - REDIS_ADDR=redis_docker:6379 # Connect ke Redis Shared
+    networks:
+      - app-network
+
+  # ==============================
+  # FRONTEND (VUE + NGINX)
+  # ==============================
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: fastunduh-frontend
+    restart: unless-stopped
+    ports:
+      - "3006:80" # Akses Web di http://localhost:3006 (Unik)
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+# Gunakan Network Global yang sudah ada
+networks:
+  app-network:
+    external: true
+    name: multyapp-project_app-network

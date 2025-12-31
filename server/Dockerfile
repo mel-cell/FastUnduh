@@ -22,7 +22,7 @@ RUN go build -o main .
 RUN mkdir -p downloads
 
 # Expose port
-EXPOSE 3000
+EXPOSE 8080
 
 # Run the application
 CMD ["./main"]

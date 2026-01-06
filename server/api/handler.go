@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
@@ -113,5 +114,10 @@ func StartServer(rdb *redis.Client) {
 	})
 
 	// Jalankan Server
-	app.Listen(":3000")
+	// Jalankan Server
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000"
+	}
+	app.Listen(":" + port)
 }

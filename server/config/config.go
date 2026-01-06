@@ -2,6 +2,7 @@ package config
 
 import (
 	"context"
+	"os"
 	"time"
 
 	"github.com/alicebob/miniredis/v2"
@@ -23,8 +24,13 @@ const (
 
 func InitRedis() {
 	// 1. Coba connect ke Redis asli dulu
+	redisAddr := os.Getenv("REDIS_ADDR")
+	if redisAddr == "" {
+		redisAddr = "localhost:6379"
+	}
+
 	Rdb = redis.NewClient(&redis.Options{
-		Addr: "localhost:6379",
+		Addr: redisAddr,
 		DB:   0,
 	})
 

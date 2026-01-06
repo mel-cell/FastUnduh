@@ -39,6 +39,6 @@ func main() {
 
 	// 4. Start API Server
 	// Blocking call (akan menahan main process agar tidak exit)
-	log.Println("🚀 FastUnduh Backend System Starting on :3000")
+	log.Println("🚀 FastUnduh Backend System Starting...")
 	api.StartServer(config.Rdb)
 }

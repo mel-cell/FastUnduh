@@ -9,7 +9,7 @@ services:
     container_name: fastunduh-backend
     restart: unless-stopped
     ports:
-      - "8085:8080" # Backend API di port 8085 (Unik)
+      - "8085:8080" 
     volumes:
       - ./downloads:/app/downloads # Agar hasil download bisa diakses di host jika perlu
     environment:
@@ -18,6 +18,10 @@ services:
       - REDIS_ADDR=redis_docker:6379 # Connect ke Redis Shared
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 512m
 
   # ==============================
   # FRONTEND (VUE + NGINX)
@@ -34,6 +38,10 @@ services:
       - backend
     networks:
       - app-network
+    deploy:
+      resources:
+        limits:
+          memory: 256m
 
 # Gunakan Network Global yang sudah ada
 networks:

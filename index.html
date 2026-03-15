@@ -1,30 +1,62 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' y1='15' x2='12' y2='3'/></svg>" />
-    
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233b82f6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4'/><polyline points='7 10 12 15 17 10'/><line x1='12' y1='15' x2='12' y2='3'/></svg>"
+    />
+
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Primary Meta Tags -->
-    <title>FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡</title>
-    <meta name="title" content="FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡">
-    <meta name="description" content="Download video dari YouTube, Instagram, TikTok, dan lainnya dengan kecepatan kilat. Gratis, aman, tanpa iklan, dan mainkan game seru sambil menunggu!">
-    <meta name="keywords" content="download video, youtube downloader, tiktok downloader, instagram downloader, fastunduh, tanpa iklan, gratis">
-    <meta name="author" content="FastUnduh Team">
-    <meta name="theme-color" content="#0f172a">
+    <title>FastUnduh - Professional Social Media Downloader</title>
+    <meta
+      name="title"
+      content="FastUnduh - Professional Social Media Downloader"
+    />
+    <meta
+      name="description"
+      content="Download high-quality content from any platform. No watermarks. No complexity. Just paste the link and save your media in seconds."
+    />
+    <meta
+      name="keywords"
+      content="download video, youtube downloader, tiktok downloader, instagram downloader, fastunduh, tanpa iklan, gratis"
+    />
+    <meta name="author" content="FastUnduh Team" />
+    <meta name="theme-color" content="#ffffff" />
 
     <!-- Open Graph / Facebook -->
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://fastunduh.busines.biz.id/">
-    <meta property="og:title" content="FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡">
-    <meta property="og:description" content="Download video dari YouTube, Instagram, TikTok, dan lainnya dengan kecepatan kilat. Gratis, aman, tanpa iklan.">
-    
-    <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="https://fastunduh.busines.biz.id/">
-    <meta property="twitter:title" content="FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡">
-    <meta property="twitter:description" content="Download video dari YouTube, Instagram, TikTok, dan lainnya dengan kecepatan kilat. Gratis, aman, tanpa iklan.">
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://fastunduh.busines.biz.id/" />
+    <meta
+      property="og:title"
+      content="FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡"
+    />
+    <meta
+      property="og:description"
+      content="Download video dari YouTube, Instagram, TikTok, dan lainnya dengan kecepatan kilat. Gratis, aman, tanpa iklan."
+    />
 
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://fastunduh.busines.biz.id/" />
+    <meta
+      property="twitter:title"
+      content="FastUnduh - Download Video Cepat & Gratis Tanpa Iklan ⚡"
+    />
+    <meta
+      property="twitter:description"
+      content="Download video dari YouTube, Instagram, TikTok, dan lainnya dengan kecepatan kilat. Gratis, aman, tanpa iklan."
+    />
   </head>
   <body>
     <div id="app"></div>
@@ -34,18 +66,19 @@
       const schema = {
         "@context": "https://schema.org",
         "@type": "SoftwareApplication",
-        "name": "FastUnduh",
-        "applicationCategory": "MultimediaApplication",
-        "operatingSystem": "Web",
-        "offers": {
+        name: "FastUnduh",
+        applicationCategory: "MultimediaApplication",
+        operatingSystem: "Web",
+        offers: {
           "@type": "Offer",
-          "price": "0",
-          "priceCurrency": "IDR"
+          price: "0",
+          priceCurrency: "IDR",
         },
-        "description": "Aplikasi web untuk mengunduh video dari berbagai platform sosial media dengan cepat dan tanpa iklan."
+        description:
+          "Aplikasi web untuk mengunduh video dari berbagai platform sosial media dengan cepat dan tanpa iklan.",
       };
-      const script = document.createElement('script');
-      script.type = 'application/ld+json';
+      const script = document.createElement("script");
+      script.type = "application/ld+json";
       script.text = JSON.stringify(schema);
       document.head.appendChild(script);
     </script>

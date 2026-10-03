@@ -1,0 +1,43 @@
+steps:
+  - name: build-client
+    image: node:22-alpine
+    commands:
+      - npm ci
+      - npm run build
+    when:
+      event: [push, manual, pull_request]
+      branch: [main, master, develop]
+
+  - name: test-backend
+    image: golang:1.23-alpine
+    commands:
+      - cd server && go mod download && go build -o /tmp/main .
+    when:
+      event: [push, manual]
+      branch: [main, master, develop]
+
+  - name: build-images
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: ghcr.io/mel-cell/fastunduh
+      tags:
+        - latest
+        - "${CI_COMMIT_SHA:0:8}"
+      dockerfile: Dockerfile.client
+      context: .
+    when:
+      event: [push]
+      branch: [main, master]
+      status: [success]
+
+  - name: tag
+    image: woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: ghcr.io/mel-cell/fastunduh
+      tags: latest
+      dockerfile: server/Dockerfile
+      context: ./server
+    when:
+      event: [push]
+      branch: [main, master]
+      status: [success]

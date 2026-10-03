@@ -1,20 +1,65 @@
-steps:
-  - name: probe-daemon
-    image: docker.io/library/alpine:3
-    commands:
-      - echo "DOCKER_HOST=[$DOCKER_HOST]"
-      - ls -la /var/run/docker.sock 2>&1 || echo "NO SOCKET"
-    when:
-      event: [manual]
+# 
+#  Serversal CI  pipeline config
+#  File ini dibaca Woodpecker (config_file: .serversal.yml)
+#  Docs: buka /repo/<id>  tab Deploy guide di dashboard
+# 
 
-  - name: probe-buildx
+steps:
+  #  Verifikasi 
+  - name: build-client
+    image: docker.io/library/node:22-alpine
+    commands:
+      - npm ci
+      - npm run build
+    when:
+      event: [push, pull_request, manual]
+      branch: [main, master, develop]
+
+  - name: build-backend
+    image: docker.io/library/golang:1.23-alpine
+    commands:
+      - cd server && go mod download && go build -o /tmp/main .
+    when:
+      event: [push, manual]
+      branch: [main, master, develop]
+      path:
+        - server/**
+
+  #  Build & push image (dibutuhkan secret ghcr_user + ghcr_token) 
+  - name: image-client
     image: docker.io/woodpeckerci/plugin-docker-buildx
     settings:
-      repo: ghcr.io/mel-cell/fastunduh
-      tags: probe
+      registry: ghcr.io
+      repo: mel-cell/fastunduh
+      dockerfile: Dockerfile.client
+      context: .
+      tags:
+        - latest
+        - "${CI_COMMIT_SHA:0:8}"
       username:
         from_secret: ghcr_user
       password:
         from_secret: ghcr_token
     when:
-      event: [manual]
+      event: [push]
+      branch: [main, master]
+      status: [success]
+
+  - name: image-backend
+    image: docker.io/woodpeckerci/plugin-docker-buildx
+    settings:
+      registry: ghcr.io
+      repo: mel-cell/fastunduh-backend
+      dockerfile: server/Dockerfile
+      context: ./server
+      tags:
+        - latest
+        - "${CI_COMMIT_SHA:0:8}"
+      username:
+        from_secret: ghcr_user
+      password:
+        from_secret: ghcr_token
+    when:
+      event: [push]
+      branch: [main, master]
+      status: [success]

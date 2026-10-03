@@ -1,14 +1,20 @@
 steps:
-  - name: probe
+  - name: probe-daemon
     image: docker.io/library/alpine:3
     commands:
-      - echo "=== docker sock ==="
-      - ls -la /var/run/docker.sock 2>&1 || echo "no /var/run/docker.sock"
-      - echo "=== DOCKER_HOST ==="
-      - echo "$DOCKER_HOST"
-      - echo "=== podman cli ==="
-      - podman --version 2>&1 || echo "no podman cli"
-      - echo "=== podman via socket ==="
-      - DOCKER_HOST=unix:///run/podman/podman.sock podman ps --format "{{.Names}}" 2>&1 | head -5
+      - echo "DOCKER_HOST=[$DOCKER_HOST]"
+      - ls -la /var/run/docker.sock 2>&1 || echo "NO SOCKET"
+    when:
+      event: [manual]
+
+  - name: probe-buildx
+    image: docker.io/woodpeckerci/plugin-docker-buildx
+    settings:
+      repo: ghcr.io/mel-cell/fastunduh
+      tags: probe
+      username:
+        from_secret: ghcr_user
+      password:
+        from_secret: ghcr_token
     when:
       event: [manual]

@@ -1,43 +1,14 @@
 steps:
-  - name: build-client
-    image: node:22-alpine
+  - name: probe
+    image: docker.io/library/alpine:3
     commands:
-      - npm ci
-      - npm run build
+      - echo "=== docker sock ==="
+      - ls -la /var/run/docker.sock 2>&1 || echo "no /var/run/docker.sock"
+      - echo "=== DOCKER_HOST ==="
+      - echo "$DOCKER_HOST"
+      - echo "=== podman cli ==="
+      - podman --version 2>&1 || echo "no podman cli"
+      - echo "=== podman via socket ==="
+      - DOCKER_HOST=unix:///run/podman/podman.sock podman ps --format "{{.Names}}" 2>&1 | head -5
     when:
-      event: [push, manual, pull_request]
-      branch: [main, master, develop]
-
-  - name: test-backend
-    image: golang:1.23-alpine
-    commands:
-      - cd server && go mod download && go build -o /tmp/main .
-    when:
-      event: [push, manual]
-      branch: [main, master, develop]
-
-  - name: build-images
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      repo: ghcr.io/mel-cell/fastunduh
-      tags:
-        - latest
-        - "${CI_COMMIT_SHA:0:8}"
-      dockerfile: Dockerfile.client
-      context: .
-    when:
-      event: [push]
-      branch: [main, master]
-      status: [success]
-
-  - name: tag
-    image: woodpeckerci/plugin-docker-buildx
-    settings:
-      repo: ghcr.io/mel-cell/fastunduh
-      tags: latest
-      dockerfile: server/Dockerfile
-      context: ./server
-    when:
-      event: [push]
-      branch: [main, master]
-      status: [success]
+      event: [manual]
